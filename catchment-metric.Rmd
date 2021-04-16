@@ -1,0 +1,96 @@
+---
+title: "SD61 School Catchment Metrics"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["default", "default-fonts", "hygge"]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9'
+---
+
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+options(width = 90)
+options(max_print = 5)
+
+knitr::opts_chunk$set(
+  dev = "ragg_png",
+  collapse = TRUE,
+  echo = FALSE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  fig.path = "graphics/prod/figs",
+  fig.width = 10,
+  fig.height = 5,
+  dpi = 300
+)
+
+
+library(targets)
+library(tidyverse)
+
+theme_set(
+  theme_minimal() %+replace%
+    theme(axis.title = element_blank())
+  )
+```
+
+
+
+class: center, middle
+
+## School District 61 Catchment Metrics
+
+- Income data drawn from CensusMapper API
+
+---
+class: middle
+
+## Income Range
+
+```{r }
+dat <- tar_read(median_income) %>%
+  summarise(Min = min(var),
+            Max = max(var)) %>%
+  pivot_longer(cols = -School) %>% 
+  mutate(order_value = min(value, na.rm = FALSE)) %>%
+  filter(!is.na(value))
+
+ggplot(dat, aes(x = value, y = fct_reorder(School, order_value, .desc = TRUE), colour = name, group = School)) +
+  geom_point() +
+  geom_line(colour = 'black') +
+  labs(caption = cancensus::dataset_attribution("TX2018"))
+```
+
+---
+
+## Percent of Population on Employment Assistance in Community
+
+```{r}
+tar_read(ei_benefits) %>% 
+  filter(!is.na(var)) %>% 
+  summarise(mean_ei_percent = mean(var)) %>% 
+  ggplot(aes(x = mean_ei_percent, y = fct_reorder(School, mean_ei_percent))) +
+  geom_col() +
+  labs(caption = cancensus::dataset_attribution("TX2018"))
+```
+
+---
+
+## Low Income Gap Ratio
+```{r}
+tar_read(li_gap_ratio) %>% 
+  filter(!is.na(var)) %>% 
+  summarise(li_gap_ratio = mean(var)) %>% 
+  ggplot(aes(x = li_gap_ratio, y = fct_reorder(School, li_gap_ratio))) +
+  geom_col() +
+  labs(caption = cancensus::dataset_attribution("TX2018"))
+```
+
+
+

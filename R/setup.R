@@ -1,0 +1,16 @@
+library(cancensus)
+library(bcmaps)
+library(dplyr)
+library(tmap)
+library(purrr)
+library(jsonlite)
+library(httr)
+suppressPackageStartupMessages(library(sf))
+library(esri2sf)
+library(ggplot2)
+library(cansim)
+library(tidyr)
+
+source("R/get_data.R")
+source("R/summarise-data.R")
+
