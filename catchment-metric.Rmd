@@ -33,6 +33,7 @@ knitr::opts_chunk$set(
 
 library(targets)
 library(tidyverse)
+library(forcats)
 
 theme_set(
   theme_minimal() %+replace%
@@ -58,12 +59,19 @@ dat <- tar_read(median_income) %>%
   summarise(Min = min(var),
             Max = max(var)) %>%
   pivot_longer(cols = -School) %>% 
-  mutate(order_value = min(value, na.rm = FALSE)) %>%
   filter(!is.na(value))
 
-ggplot(dat, aes(x = value, y = fct_reorder(School, order_value, .desc = TRUE), colour = name, group = School)) +
-  geom_point() +
+ordering <- dat %>% 
+  filter(name == "Min") %>% 
+  select(-name, order = value)
+
+dat %>% 
+  left_join(ordering, by = "School") %>% 
+  ggplot(aes(x = value, y = fct_reorder(School, order, .desc = TRUE), colour = name, group = School)) +
   geom_line(colour = 'black') +
+  geom_point() +
+  scale_colour_viridis_d(end = 0.5) +
+  guides(colour = FALSE) +
   labs(caption = cancensus::dataset_attribution("TX2018"))
 ```
 
@@ -83,7 +91,7 @@ tar_read(ei_benefits) %>%
 ---
 
 ## Low Income Gap Ratio
-```{r}
+```{r, fig.height=4}
 tar_read(li_gap_ratio) %>% 
   filter(!is.na(var)) %>% 
   summarise(li_gap_ratio = mean(var)) %>% 
@@ -92,5 +100,22 @@ tar_read(li_gap_ratio) %>%
   labs(caption = cancensus::dataset_attribution("TX2018"))
 ```
 
+Reference: https://www150.statcan.gc.ca/n1/pub/75f0002m/2015001/low-faible-eng.htm
+---
 
+## Languages Spoken at Home
+
+```{r}
+ordering <- tar_read(language_by_school) %>% 
+  filter(vector == "Not English or French") %>% 
+  select(-vector, order = mean_prop)
+
+
+tar_read(language_by_school) %>% 
+  left_join(ordering, by = "School") %>% 
+  ggplot(aes(y = fct_reorder(School, order), x = mean_prop, fill = vector)) +
+  geom_col() +
+  scale_fill_viridis_d(name = "Language", option = "mako", begin = 0.5) +
+  labs(caption = cancensus::dataset_attribution("CA16"))
+```
 

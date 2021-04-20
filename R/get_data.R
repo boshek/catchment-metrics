@@ -26,4 +26,15 @@ get_taxfiler_data <- function(dataset, CMA, vector) {
     mutate(year = gsub("TX","",dataset))
 }
 
+get_language_data <- function(dataset, CMA, vector) {
+  get_census(dataset = dataset, regions=list(CMA = CMA), vectors = c("var" = glue::glue('v_{dataset}_{vector}')),
+             geo_format = 'sf', level=c("CT"), quiet = TRUE) %>%
+    transform_bc_albers() %>%
+    mutate(vector = vector) %>%
+    mutate(year = gsub("TX","",dataset))
+}
+
+
+
+
 
