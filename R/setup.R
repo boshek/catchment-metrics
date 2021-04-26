@@ -10,6 +10,7 @@ library(esri2sf)
 library(ggplot2)
 library(cansim)
 library(tidyr)
+library(bcdata)
 
 source("R/get_data.R")
 source("R/summarise-data.R")

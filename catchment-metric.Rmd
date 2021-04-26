@@ -34,6 +34,8 @@ knitr::opts_chunk$set(
 library(targets)
 library(tidyverse)
 library(forcats)
+library(bcdata)
+library(plotly)
 
 theme_set(
   theme_minimal() %+replace%
@@ -117,5 +119,27 @@ tar_read(language_by_school) %>%
   geom_col() +
   scale_fill_viridis_d(name = "Language", option = "mako", begin = 0.5) +
   labs(caption = cancensus::dataset_attribution("CA16"))
+```
+
+---
+
+## George Jay School Population
+```{r}
+gj_school <- tar_read(school_popn_size) %>%
+  filter(DISTRICT_NAME == "Greater Victoria") %>%
+  filter(!is.na(SCHOOL_NAME)) %>%
+  rowwise() %>%
+  mutate(avg_class_size = mean(c(AVG_CLASS_SIZE_K, AVG_CLASS_SIZE_1_3, AVG_CLASS_SIZE_4_7, AVG_CLASS_SIZE_8_12), na.rm = TRUE)) %>%
+  mutate(school_size = TOTAL_CLASSES*avg_class_size) %>%
+  select(SCHOOL_YEAR, SCHOOL_NAME, school_size) %>%
+  filter(grepl("Elementary", SCHOOL_NAME))
+
+gj_school %>%
+  ggplot(aes(x = SCHOOL_YEAR, y = school_size, group = SCHOOL_NAME)) +
+  geom_line(colour = "gray80") +
+  geom_line(data = filter(gj_school, SCHOOL_NAME == "George Jay Elementary"), colour = "0405FF", size = 1.5) +
+  labs(y = "Estimated School Population", x = "School Year") +
+  theme(axis.title = element_text())
+
 ```
 

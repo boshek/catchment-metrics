@@ -29,6 +29,8 @@ list(
                mutate(vector = ifelse(vector == "563", "Not English or French", "English or French")) %>%
                group_by(School, vector) %>%
                summarise(mean_prop = mean(prop, na.rm = TRUE))),
+  tar_target(school_popn_size, bcdc_get_data('dd2b0390-c77a-4c9f-b1bc-cb8d9f4a23c5',
+                                             resource = '63e52d04-9431-44ea-93d4-5251e04a239c')),
   tar_render(catchment-metric-slides, "catchment-metric.Rmd")
 )
 
